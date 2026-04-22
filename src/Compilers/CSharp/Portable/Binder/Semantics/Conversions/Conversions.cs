@@ -43,6 +43,13 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override Conversion GetMethodGroupDelegateConversion(BoundMethodGroup source, TypeSymbol destination, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
+            if (destination.TypeKind == TypeKind.Error && source.Methods.Length == 1)
+            {
+                var method = source.Methods[0];
+                bool isExtensionMethod = source.SearchExtensions && !method.IsExtensionBlockMember();
+                return new Conversion(ConversionKind.MethodGroup, method, isExtensionMethod: isExtensionMethod);
+            }
+
             // Must be a bona fide delegate type, not an expression tree type.
             if (!destination.IsDelegateType())
             {

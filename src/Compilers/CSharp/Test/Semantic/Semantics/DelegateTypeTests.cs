@@ -2362,6 +2362,35 @@ public static class E
             AssertEx.Equal(["void C.M()"], model.GetMemberGroup(memberAccess).ToTestDisplayStrings());
         }
 
+        [Fact]
+        public void MethodGroup_ToMissingDelegate_GetSymbolInfo_BestEffort()
+        {
+            var source = """
+class C
+{
+    static void M<T>(int x) { }
+
+    static void Test()
+    {
+        Foo(M<int>);
+    }
+
+    static void Foo(MissingDelegate d) { }
+}
+""";
+
+            var comp = CreateCompilation(source);
+            comp.VerifyDiagnostics(
+                // (10,21): error CS0246: The type or namespace name 'MissingDelegate' could not be found (are you missing a using directive or an assembly reference?)
+                //     static void Foo(MissingDelegate d) { }
+                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "MissingDelegate").WithArguments("MissingDelegate").WithLocation(10, 21));
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var methodGroup = GetSyntax<GenericNameSyntax>(tree, "M<int>");
+            Assert.Equal("void C.M<T>(System.Int32 x)", model.GetSymbolInfo(methodGroup).Symbol.ToTestDisplayString());
+        }
+
         [Theory, CombinatorialData, WorkItem("https://github.com/dotnet/csharplang/issues/7364")]
         public void MethodGroup_ScopeByScope_InstanceReceiver(bool useCSharp13)
         {

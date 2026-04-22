@@ -3640,6 +3640,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(conversion.Method is object);
             MethodSymbol selectedMethod = conversion.Method;
 
+            if (delegateOrFuncPtrType.TypeKind == TypeKind.Error)
+            {
+                return false;
+            }
+
             if (!Conversions.IsAssignableFromMulticastDelegate(delegateOrFuncPtrType, ref discardedUseSiteInfo))
             {
                 if (!MethodIsCompatibleWithDelegateOrFunctionPointer(receiverOpt, isExtensionMethod, selectedMethod, delegateOrFuncPtrType, syntax.Location, diagnostics) ||
