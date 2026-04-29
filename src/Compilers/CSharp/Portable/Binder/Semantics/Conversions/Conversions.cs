@@ -44,12 +44,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         public override Conversion GetMethodGroupDelegateConversion(BoundMethodGroup source, TypeSymbol destination, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
             if (destination.TypeKind == TypeKind.Error &&
-                source.Methods.Length == 1 &&
-                destination is ErrorTypeSymbol { ErrorInfo.Code: (int)ErrorCode.ERR_SingleTypeNameNotFound or (int)ErrorCode.ERR_DottedTypeNameNotFoundInNS or (int)ErrorCode.ERR_DottedTypeNameNotFoundInAgg })
+                source.Methods is [{ } method])
             {
-                var method = source.Methods[0];
-                bool isExtensionMethod = source.SearchExtensions && !method.IsExtensionBlockMember();
-                return new Conversion(ConversionKind.MethodGroup, method, isExtensionMethod: isExtensionMethod);
+                return new Conversion(ConversionKind.MethodGroup, method, isExtensionMethod: method.IsExtensionMethod);
             }
 
             // Must be a bona fide delegate type, not an expression tree type.

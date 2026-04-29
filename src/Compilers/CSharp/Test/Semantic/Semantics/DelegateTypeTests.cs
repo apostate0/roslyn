@@ -2362,7 +2362,7 @@ public static class E
             AssertEx.Equal(["void C.M()"], model.GetMemberGroup(memberAccess).ToTestDisplayStrings());
         }
 
-        [Fact]
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/82191")]
         public void MethodGroup_ToMissingDelegate_GetSymbolInfo_BestEffort()
         {
             var source = """
